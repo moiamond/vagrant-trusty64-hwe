@@ -6,6 +6,12 @@ require './vagrant-provision-reboot-plugin'
 
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
+  
+  if Vagrant.has_plugin?("vagrant-cachier")
+    # Configure cached packages to be shared between instances of the same base box.
+    # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
+    config.cache.scope = :box
+  end
 
   config.vm.provision "shell", inline: <<-SHELL
     apt-get remove -y linux-image-generic linux-headers-generic linux-tools-generic
