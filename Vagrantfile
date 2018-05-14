@@ -12,6 +12,8 @@ Vagrant.configure(2) do |config|
   
   config.vm.synced_folder "..", "/code"
 
+  config.vm.network "public_network"
+  
   if Vagrant.has_plugin?("vagrant-cachier")
     # Configure cached packages to be shared between instances of the same base box.
     # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
