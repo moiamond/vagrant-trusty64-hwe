@@ -13,7 +13,7 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder "..", "/code"
 
   config.vm.network "public_network"
-  
+
   if Vagrant.has_plugin?("vagrant-cachier")
     # Configure cached packages to be shared between instances of the same base box.
     # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
@@ -82,6 +82,7 @@ Vagrant.configure(2) do |config|
         texinfo \
         zlib1g-dev \
         yasm \
+        nasm \
         tar
   SHELL
   # Build libfreetype2
@@ -91,6 +92,13 @@ Vagrant.configure(2) do |config|
     cd freetype-2.4.12
     ./configure
     make
+    make install
+  SHELL
+  # Build openh264
+  config.vm.provision "shell", inline: <<-SHELL
+    git clone https://github.com/cisco/openh264.git
+    cd openh264
+    make ENABLE64BIT=Yes # Use ENABLE64BIT=No for 32bit platforms
     make install
   SHELL
   # build ffmpeg
@@ -105,8 +113,9 @@ Vagrant.configure(2) do |config|
   SHELL
 
   config.vm.provider "virtualbox" do |vb|
-      vb.name = $VM_NAME
-        vb.cpus = 2
+    vb.name = $VM_NAME
+    vb.memory = "4096"
+    vb.cpus = 2
   end
 
 end
