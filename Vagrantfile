@@ -25,7 +25,16 @@ Vagrant.configure(2) do |config|
     apt-get update
     apt-get install -y linux-image-generic-lts-xenial linux-headers-generic-lts-xenial
   SHELL
-      # Run a reboot of a *NIX guest.
+  
+  # Run a reboot of a *NIX guest.
+  config.vm.provision :unix_reboot
+
+  # Install Desktop
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get -y install --no-install-recommends lubuntu-desktop
+  SHELL
+  
+  # Run a reboot of a *NIX guest.
   config.vm.provision :unix_reboot
 
   config.vm.provision "shell", inline: <<-SHELL
