@@ -66,12 +66,12 @@ Vagrant.configure(2) do |config|
         psmisc \
         software-properties-common \
         cmake \
-        pkg-config
+        pkg-config \
+        tofrodos
 
     apt-get -y install \
         build-essential \
         libass-dev \
-        libfreetype6-dev \
         libsdl1.2-dev \
         libtheora-dev \
         libtool \
@@ -81,7 +81,6 @@ Vagrant.configure(2) do |config|
         libxcb1-dev \
         libxcb-shm0-dev \
         libxcb-xfixes0-dev \
-        libx264-dev \
         libvpx-dev \
         libopus-dev \
         libgsm1-dev \
@@ -103,20 +102,30 @@ Vagrant.configure(2) do |config|
     make
     make install
   SHELL
+  # Build x264
+  config.vm.provision "shell", inline: <<-SHELL
+    wget https://download.videolan.org/x264/snapshots/x264-snapshot-20161127-2245.tar.bz2
+    tar -xvjf x264-snapshot-20161127-2245.tar.bz2
+    cd x264-snapshot-20161127-2245
+    ./configure --enable-shared --enable-pic
+    make
+    make install
+  SHELL
   # Build openh264
   config.vm.provision "shell", inline: <<-SHELL
-    git clone https://github.com/cisco/openh264.git
-    cd openh264
+    wget https://github.com/cisco/openh264/archive/v1.6.0.tar.gz
+    tar -xvzf v1.6.0.tar.gz
+    cd openh264-1.6.0
     make ENABLE64BIT=Yes # Use ENABLE64BIT=No for 32bit platforms
     make install
   SHELL
   # build ffmpeg
   config.vm.provision "shell", inline: <<-SHELL
-    git clone git://source.ffmpeg.org/ffmpeg.git ffmpeg
-    cd ffmpeg
-    git checkout n1.2
+    wget http://ffmpeg.org/releases/ffmpeg-1.2.12.tar.gz
+    tar -xvzf ffmpeg-1.2.12.tar.gz
+    cd ffmpeg-1.2.12
 
-    ./configure --extra-cflags="-fPIC" --extra-ldflags="-lpthread" --enable-pic --enable-memalign-hack --enable-pthreads --enable-shared --disable-static --disable-network --enable-pthreads --disable-ffmpeg --disable-ffplay --disable-ffserver --disable-ffprobe --enable-gpl --disable-debug --enable-libfreetype --enable-libfaac --enable-nonfree
+    ./configure --extra-cflags="-fPIC" --extra-ldflags="-lpthread" --enable-pic --enable-memalign-hack --enable-pthreads --enable-shared --disable-static --enable-pthreads --disable-ffmpeg --disable-ffplay --disable-ffserver --disable-ffprobe --enable-gpl --disable-debug --enable-libfreetype --enable-libfaac --enable-nonfree
     make
     make install
   SHELL
