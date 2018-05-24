@@ -4,7 +4,7 @@
 # Require the reboot plugin.
 require './vagrant-provision-reboot-plugin'
 
-$VM_NAME = "vc-lab"
+$VM_NAME = "vc-lab-wm"
 
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
@@ -31,11 +31,17 @@ Vagrant.configure(2) do |config|
 
   # Install Desktop
   config.vm.provision "shell", inline: <<-SHELL
-    apt-get -y install --no-install-recommends lubuntu-desktop
+    apt-get install -y xubuntu-desktop
+    apt-get install -y tightvncserver
+    apt-get install -y xrdp
   SHELL
   
   # Run a reboot of a *NIX guest.
   config.vm.provision :unix_reboot
+
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+    echo "xfce4-session"> ~/.xsession
+  SHELL
 
   config.vm.provision "shell", inline: <<-SHELL
     # install basic dev tools
@@ -134,6 +140,20 @@ Vagrant.configure(2) do |config|
     vb.name = $VM_NAME
     vb.memory = "4096"
     vb.cpus = 2
+
+    # change the network card hardware for better performance
+    vb.customize ["modifyvm", :id, "--nictype1", "virtio" ]
+    vb.customize ["modifyvm", :id, "--nictype2", "virtio" ]
+
+    # suggested fix for slow network performance
+    # see https://github.com/mitchellh/vagrant/issues/1807
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+
+    vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+
+    vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
+    vb.customize ["modifyvm", :id, "--vram", "64"]
   end
 
 end
