@@ -21,8 +21,13 @@ Vagrant.configure(2) do |config|
     apt-get update
     apt-get install -y linux-image-generic-lts-xenial linux-headers-generic-lts-xenial
   SHELL
-      # Run a reboot of a *NIX guest.
+  # Run a reboot of a *NIX guest.
   config.vm.provision :unix_reboot
+
+  config.vm.provision "shell", inline: <<-SHELL
+    curl -sSL https://get.docker.com/ | sh
+    usermod -aG docker vagrant
+  SHELL
 
   config.vm.provider "virtualbox" do |vb|
       vb.name = $VM_NAME
