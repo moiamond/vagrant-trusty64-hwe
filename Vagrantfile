@@ -4,7 +4,7 @@
 # Require the reboot plugin.
 require './vagrant-provision-reboot-plugin'
 
-$VM_NAME = "lab"
+$VM_NAME = File.basename(Dir.getwd)
 
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
