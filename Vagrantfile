@@ -29,9 +29,23 @@ Vagrant.configure(2) do |config|
     usermod -aG docker vagrant
   SHELL
 
+  config.vm.provision "shell", inline: <<-SHELL
+    docker run -d --name jenkins-ci-slave \
+        --restart always \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /usr/bin/docker:/usr/bin/docker \
+        moiamond/jenkins-ci-slave \
+        -master http://jenkins.bss.moiamond.com \
+        -name slave \
+        -labels docker \
+        -username swarm-slave \
+        -password swarm-slave
+  SHELL
+
   config.vm.provider "virtualbox" do |vb|
       vb.name = $VM_NAME
-        vb.cpus = 2
+      vb.memory = "2048"
+      vb.cpus = 2
   end
 
 end
