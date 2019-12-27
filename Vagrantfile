@@ -28,12 +28,32 @@ Vagrant.configure(2) do |config|
     curl -sSL https://get.docker.com/ | sh
     usermod -aG docker vagrant
   SHELL
+  
+  config.vm.provision "shell", inline: <<-SHELL
+    service docker stop
+
+    pushd /etc/docker
+    
+cat <<EOF > daemon.json
+{
+  "insecure-registries" : ["registry.bss.moiamond.com:80"]
+}
+EOF
+
+    popd
+
+    service docker start
+  SHELL
 
   config.vm.provision "shell", inline: <<-SHELL
+    midir -p /home/jenkins-slave/workspace
+    chmod -R 777 /home/jenkins-slave/workspace
+
     docker run -d --name jenkins-ci-slave \
         --restart always \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v /usr/bin/docker:/usr/bin/docker \
+        -v /home/jenkins-slave/workspace:/home/jenkins-slave/workspace \
         moiamond/jenkins-ci-slave \
         -master http://jenkins.bss.moiamond.com \
         -name slave \
